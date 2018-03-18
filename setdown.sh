@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #
 # Dialog
 #
@@ -6,27 +8,35 @@ setdown_dialog='dialog --scrollbar --no-lines --no-shadow --output-fd 1'
 
 # Displays a message and exits, leaving it on screen
 # setdown_putstr "message string"
-setdown_putstr() { $setdown_dialog --infobox "$1" 12 50; }
+setdown_putstr() {
+  $setdown_dialog --infobox "$1" 12 50
+}
 
 # Displays a message and waits for user to press OK
 # setdown_putstr_ok "message string"
-setdown_putstr_ok() { $setdown_dialog --msgbox "$1" 12 50; }
+setdown_putstr_ok() {
+  $setdown_dialog --msgbox "$1" 12 50
+}
 
 # Displays stdout + stderr from a command and exits, leaving output on screen
 # setdown_putcmd find / -size 15c
 setdown_putcmd() {
   "$@" 2>&1 | $setdown_dialog --progressbox 24 80
-  return ${PIPESTATUS[0]}
+  return "${PIPESTATUS[0]}"
 }
 
 # Prompts for string input using the given heading
 # name=`setdown_getstr "Who is the user?" "root"`
 # [ `setdown_getstr "Who is the user?"` == "lain" ] && echo "it's her"
-setdown_getstr() { $setdown_dialog --inputbox "$1" 12 50 "$2"; }
+setdown_getstr() {
+  $setdown_dialog --inputbox "$1" 12 50 "$2"
+}
 
 # Prompts for password input
 # secret="$(setdown_getpw 'Enter your password:')"
-setdown_getpw() { $setdown_dialog --passwordbox "$1" 12 50; }
+setdown_getpw() {
+  $setdown_dialog --passwordbox "$1" 12 50
+}
 
 # Primes the sudo cache if necessary to avoid breaking the gui
 # setdown_sudo 'Enter your password:' && sudo whoami || echo "No auth"
@@ -46,8 +56,7 @@ setdown_sudo() {
 # setdown_getconsent "Continue?" && echo "They said yes"
 # if setdown_getconsent "Continue?"; then echo "They said yes"; fi
 setdown_getconsent() {
-  $setdown_dialog --yesno "$1" 12 50
-  [ $? -eq 0 ] && true || false
+  [ "$($setdown_dialog --yesno "$1" 12 50)" -eq 0 ] && true || false
 }
 
 # Displays a checklist with choices from an associative array
@@ -58,7 +67,7 @@ setdown_getconsent() {
 setdown_getopts() {
   local -n options=$2
   echo '('
-  [[ "${options[@]}" ]] && $setdown_dialog --no-items --checklist \
+  [[ "${options[*]}" ]] && $setdown_dialog --no-items --checklist \
     "$1" 24 70 16 "${options[@]}"
   echo ')'
 }
@@ -72,9 +81,13 @@ setdown_getopts() {
 setdown_link() {
   # Create link if doesn't exist, already points to target, or user consents
   if ! ln -s "$1" "$2" >/dev/null 2>&1; then
-    [ -z "$(readlink "$2"* | grep "$1")" ] &&
-      setdown_getconsent "Couldn't link $1 to $2, try forcing?" &&
+    if ! readlink "$2"* | grep -wq "$1"; then
+      if setdown_getconsent "Couldn't link $1 to $2, try forcing?"; then
         ln -sf "$1" "$2"
+      else
+        return 1
+      fi
+    fi
   fi
 }
 
@@ -93,9 +106,13 @@ setdown_copy() {
 setdown_sudo_link() {
   # Create link if doesn't exist, already points to target, or user consents
   if ! sudo ln -s "$1" "$2" >/dev/null 2>&1; then
-    [ -z "$(readlink "$2"* | grep "$1")" ] &&
-      setdown_getconsent "Couldn't link $1 to $2, try forcing?" &&
+    if ! readlink "$2"* | grep -wq "$1"; then
+      if setdown_getconsent "Couldn't link $1 to $2, try forcing?"; then
         sudo ln -sf "$1" "$2"
+      else
+        return 1
+      fi
+    fi
   fi
 }
 
@@ -117,7 +134,7 @@ setdown_sudo_copy() {
 # if setdown_hascmd ruby; then ruby -v; fi
 # setdown_hascmd ruby && has_ruby=true || has_ruby=false
 setdown_hascmd() {
-  command -v $1 >/dev/null
+  command -v "$1" >/dev/null
 }
 
 # Determines if an entry is in an array
