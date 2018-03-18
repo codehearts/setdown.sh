@@ -116,13 +116,21 @@ setdown_sudo_copy() {
 # Determines if the command is available
 # if setdown_hascmd ruby; then ruby -v; fi
 # setdown_hascmd ruby && has_ruby=true || has_ruby=false
-setdown_hascmd() { command -v $1 >/dev/null && true || false;  }
+setdown_hascmd() {
+  command -v $1 >/dev/null
+}
 
 # Determines if an entry is in an array
-# fruits=(apple banana cranberry)
+# fruits=(apple banana cherry)
 # if setdown_hasstr fruits 'celery'; then echo 'celery is a fruit'; fi
 setdown_hasstr() {
   local -n list=$1
-  for item in "${list[@]}"; do [[ "$2" == "$item" ]] && return 0; done
+
+  for item in "${list[@]}"; do
+    if [[ "$2" == "$item" ]]; then
+      return 0
+    fi
+  done
+
   return 1
 }
