@@ -1,7 +1,7 @@
 REPO_ROOT=$(shell git rev-parse --show-toplevel)
 KCOV_VERSION=33
 
-test: lint coverage test_bash4_4
+test: test_bash4_4
 
 test_bash4_4: docker_installed
 	@docker pull bash:4.4
