@@ -56,7 +56,11 @@ setdown_sudo() {
 # setdown_getconsent "Continue?" && echo "They said yes"
 # if setdown_getconsent "Continue?"; then echo "They said yes"; fi
 setdown_getconsent() {
-  [ "$($setdown_dialog --yesno "$1" 12 50)" -eq 0 ] && true || false
+  if [ "$($setdown_dialog --yesno "$1" 12 50)" -eq 0 ]; then
+    true
+  else
+    false
+  fi
 }
 
 # Displays a checklist with choices from an associative array
