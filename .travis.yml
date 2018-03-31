@@ -5,6 +5,9 @@ language: bash
 services:
   - docker
 
+install:
+  - make install
+
 script:
   - make test
 
