@@ -18,11 +18,19 @@
 #
 # The following variables are provided for all test cases to use:
 # - FILE_1: File path for use in tests.
-#           If this file is created, it will be removed between testcases.
+#           This file is removed between testcases.
 # - FILE_2: File path for use in tests.
-#           If this file is created, it will be removed between testcases.
+#           This file is removed between testcases.
 # - FILE_3: File path for use in tests.
-#           If this file is created, it will be removed between testcases.
+#           This file is removed between testcases.
+# - DIR_1_FILE_1: File path inside DIR_1 for use in tests.
+#                 This file is removed between testcases.
+# - DIR_1_FILE_2: File path inside DIR_1 for use in tests.
+#                 This file is removed between testcases.
+# - DIR_2_FILE_1: File path inside DIR_2 for use in tests.
+#                 This file is removed between testcases.
+# - DIR_2_FILE_2: File path inside DIR_2 for use in tests.
+#                 This file is removed between testcases.
 # - DIR_1: Directory path for use in tests.
 #          If this directory is created, it will be removed between testcases.
 # - DIR_2: Directory path for use in tests.
@@ -55,6 +63,10 @@ oneTimeSetUp() {
   readonly FILE_3="$_FILE_DIR/file_3"
   readonly DIR_1="$_FILE_DIR/dir_1"
   readonly DIR_2="$_FILE_DIR/dir_2"
+  readonly DIR_1_FILE_1="$DIR_1/file_1"
+  readonly DIR_1_FILE_2="$DIR_1/file_2"
+  readonly DIR_2_FILE_1="$DIR_2/file_1"
+  readonly DIR_2_FILE_2="$DIR_2/file_2"
 }
 
 # Run once after the last test is run

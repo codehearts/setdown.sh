@@ -11,10 +11,27 @@ I'm personally using setdown.sh for my [dotfiles](https://github.com/codehearts/
 #### `setdown_link`
 
 **depends on: dialog | grep | readlink | ln**  
-Creates a symlink from `$2` pointing to `$1`. If the link can't be created, the user will be asked to force linking.
+Creates a symlink from `$2` pointing to `$1`.
+
+- If the link can't be created, the user will be asked to force linking.
 
 ```bash
 setdown_link ~/dotfiles/.bashrc ~/.bashrc
+```
+
+#### `setdown_copy`
+
+**depends on: dialog | cmp | cp**  
+Copies `$1` to `$2`.
+
+- Directories will always be placed at the destination location rather than inside it.
+- If the destination already exists or copying fails, the user will be asked to force copying.
+- If the source is a file and the destination is identical, no copy is performed.
+- If the source is a directory and the destination is identical, the user will be prompted to overwrite.
+
+```bash
+setdown_copy ~/dotfiles/.bashrc ~/.bashrc
+setdown_copy ~/dotfiles/.vim/ ~/.vim/
 ```
 
 #### `setdown_hascmd`
