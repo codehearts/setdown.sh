@@ -1,108 +1,74 @@
 #!/usr/bin/env bash
 
-# Create a unique file for each test to redirect command output to
-oneTimeSetUp() {
-  readonly COMMAND_OUTPUT_FILE=$(mktemp)
-  readonly FILE_DIR=$(mktemp -d)
-  readonly FILE_1="$FILE_DIR/file_1"
-  readonly FILE_2="$FILE_DIR/file_2"
-  readonly LINK="$FILE_DIR/link"
-}
-
-# Delete the temporary file directory after running all tests
-oneTimeTearDown() {
-  rm -rf "$FILE_DIR"
-}
-
-# Create the temporary files before each test
-setUp() {
-  touch "$FILE_1" "$FILE_2"
-}
-
-# Clear the command output file and remove temp files/links after each test
-tearDown() {
-  : > "$COMMAND_OUTPUT_FILE"
-  rm -f "$FILE_1" "$FILE_2" "$LINK"
-}
-
-
-
 test_link_does_not_exist() {
-  stub setdown_getconsent
-  setdown_link "$FILE_1" "$LINK" > "$COMMAND_OUTPUT_FILE" 2>&1
+  touch "$FILE_1"
 
-  assertTrue \
-    "Linking returned false when file was successfully linked" \
-    "$?"
-  assertEquals \
-    "Link was created to wrong file" \
-    "$FILE_1" "$(readlink "$LINK")"
-  assertFalse \
-    "Prompt was displayed when link was created successfully" \
+  stub setdown_getconsent
+  assertCommandTrue "Returned false when ln was successful" \
+    setdown_link "$FILE_1" "$FILE_2"
+  assertCommandOutputNull
+
+  assertEquals "Link was created to wrong file" \
+    "$FILE_1" "$(readlink "$FILE_2")"
+  assertFalse "Prompt was displayed when link was created successfully" \
     "stub_called setdown_getconsent"
-  assertNull "Output was not supressed" "$(cat "$COMMAND_OUTPUT_FILE")"
+
+  restore setdown_getconsent
 }
 
 test_link_already_exists_to_same_file() {
-  ln -s "$FILE_1" "$LINK"
+  touch "$FILE_1"
+  ln -s "$FILE_1" "$FILE_2"
 
   stub setdown_getconsent
-  setdown_link "$FILE_1" "$LINK" > "$COMMAND_OUTPUT_FILE" 2>&1
+  assertCommandTrue "Returned false when link to file already existed" \
+    setdown_link "$FILE_1" "$FILE_2"
+  assertCommandOutputNull
 
-  assertTrue \
-    "Linking returned false when link to file already existed" \
-    "$?"
-  assertEquals \
-    "Link was changed when it should have been left alone" \
-    "$FILE_1" "$(readlink "$LINK")"
-  assertFalse \
-    "Prompt was displayed when link should have been left alone" \
+  assertEquals "Link was changed when it should have been left alone" \
+    "$FILE_1" "$(readlink "$FILE_2")"
+  assertFalse "Prompt was displayed when link should have been left alone" \
     "stub_called setdown_getconsent"
-  assertNull "Output was not supressed" "$(cat "$COMMAND_OUTPUT_FILE")"
+
+  restore setdown_getconsent
 }
 
 test_link_already_exists_to_different_file_user_forces() {
-  ln -s "$FILE_2" "$LINK"
+  # Link file_2 to file_3, then attempt to link file_2 to file_1
+  touch "$FILE_1", "$FILE_3"
+  ln -s "$FILE_3" "$FILE_2"
 
   stub_and_eval setdown_getconsent "true"
-  setdown_link "$FILE_1" "$LINK" > "$COMMAND_OUTPUT_FILE" 2>&1
+  assertCommandTrue "Returned false when ln failed and user forced link" \
+    setdown_link "$FILE_1" "$FILE_2"
+  assertCommandOutputNull
 
-  assertTrue \
-    "Linking returned false when link to file existed and user forced link" \
-    "$?"
-  assertEquals \
-    "Link was not forcefully overwritten" \
-    "$FILE_1" \
-    "$(readlink "$LINK")"
-  assertEquals \
-    "Prompt was not displayed when determining whether to force linking" \
-    "1" \
-    "$(stub_called_times 'setdown_getconsent')"
-  assertTrue \
-    "Prompt displayed with wrong message" \
-    "stub_called_with 'setdown_getconsent' \"Couldn't link $FILE_1 to $LINK, try forcing?\""
-  assertNull "Output was not supressed" "$(cat "$COMMAND_OUTPUT_FILE")"
+  assertEquals "Link was not forcefully overwritten" \
+    "$FILE_1" "$(readlink "$FILE_2")"
+  assertEquals "Prompt was not displayed to force linking" \
+    "1" "$(stub_called_times setdown_getconsent)"
+  assertTrue "Prompt displayed with wrong message" \
+    "stub_called_with 'setdown_getconsent' \"Couldn't link $FILE_1 to $FILE_2, try forcing?\""
+
+  restore setdown_getconsent
 }
 
 test_link_already_exists_to_different_file_user_does_not_force() {
-  ln -s "$FILE_2" "$LINK"
+  # Link file_2 to file_3, then attempt to link file_2 to file_1
+  touch "$FILE_1", "$FILE_3"
+  ln -s "$FILE_3" "$FILE_2"
 
   stub_and_eval setdown_getconsent "false"
-  setdown_link "$FILE_1" "$LINK" > "$COMMAND_OUTPUT_FILE" 2>&1
+  assertCommandFalse "Returned true when ln failed and user didn't force" \
+    setdown_link "$FILE_1" "$FILE_2"
+  assertCommandOutputNull
 
-  assertFalse \
-    "Linking returned true when link was not made" \
-    "$?"
-  assertEquals \
-    "Link was overwritten when it should not have been" \
-    "$FILE_2" \
-    "$(readlink "$LINK")"
-  assertEquals \
-    "Prompt was not displayed when determining whether to force linking" \
-    "1" \
-    "$(stub_called_times 'setdown_getconsent')"
-  assertTrue \
-    "Prompt displayed with wrong message" \
-    "stub_called_with 'setdown_getconsent' \"Couldn't link $FILE_1 to $LINK, try forcing?\""
-  assertNull "Output was not supressed" "$(cat "$COMMAND_OUTPUT_FILE")"
+  assertEquals "Link was overwritten when it should not have been" \
+    "$FILE_3" "$(readlink "$FILE_2")"
+  assertEquals "Prompt was not displayed to force linking" \
+    "1" "$(stub_called_times 'setdown_getconsent')"
+  assertTrue "Prompt displayed with wrong message" \
+    "stub_called_with 'setdown_getconsent' \"Couldn't link $FILE_1 to $FILE_2, try forcing?\""
+
+  restore setdown_getconsent
 }
