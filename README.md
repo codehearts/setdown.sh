@@ -59,12 +59,19 @@ fi
 
 ## Development
 
-The dev tools for this project include [ShellCheck](https://github.com/koalaman/shellcheck) for static analysis, [shUnit2](https://github.com/kward/shunit2) for the test framework, [stub.sh](https://github.com/jimeh/stub.sh) for test mocks, and [Docker](https://www.docker.com) to run these tools. You only need Docker to get contribute.
+When your changes are ready, create a pull request and I'll get to it as soon as possible! Continuous integration is set up to ensure builds pass, but you can use Docker locally to test your changes before pushing.
 
-- To test all supported Bash versions: `make test`
-- To test a specific Bash version: `make test_bash4_4`
-- To generate test coverage `make coverage`
-- To run static analysis: `make lint`
+**Project Dev Tools**  
+- [ShellCheck](https://github.com/koalaman/shellcheck) for static analysis
+- [shUnit2](https://github.com/kward/shunit2) for the test framework
+- [stub.sh](https://github.com/jimeh/stub.sh) for test mocks
+- [Docker](https://www.docker.com) to run these tools
+
+**Available `make` Commands**  
+- `make test`: Test all supported shell versions
+- `make test_bash4_4`: Test with Bash 4.4
+- `make coverage`: Generate test coverage report
+- `make lint`: Run static analysis
 
 [coverage-badge]: https://codecov.io/gh/codehearts/setdown.sh/branch/master/graph/badge.svg
 [coverage-link]:  https://codecov.io/gh/codehearts/setdown.sh
