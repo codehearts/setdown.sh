@@ -170,8 +170,11 @@ assertCommandOutputNull() {
 # Source & run tests
 #
 
+readonly TEST_NAME="$(basename "$1")"
+
+echo -e "\\nRunning $TEST_NAME:\\n"
 # shellcheck source=/dev/null
-. ./test/"$(basename "$1")"
+. ./test/"$TEST_NAME"
 # shellcheck source=/dev/null
 source "setdown.sh"
 # shellcheck source=/dev/null

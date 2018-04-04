@@ -8,6 +8,8 @@ I'm personally using setdown.sh for my [dotfiles](https://github.com/codehearts/
 
 ## Command Reference
 
+### Filesystem Commands
+
 #### `setdown_link`
 
 **depends on: dialog | grep | readlink | ln**  
@@ -33,6 +35,19 @@ Copies `$1` to `$2`.
 setdown_copy ~/dotfiles/.bashrc ~/.bashrc
 setdown_copy ~/dotfiles/.vim/ ~/.vim/
 ```
+
+#### `setdown_sudo_link`
+
+**depends on: dialog | sudo | grep | readlink | ln**  
+Creates a symlink from `$2` pointing to `$1` with sudo permissions.
+
+- If the link can't be created, the user will be asked to force linking.
+
+```bash
+setdown_sudo_link ~/dotfiles/my_script /usr/local/sbin/my_script
+```
+
+### Utility Commands
 
 #### `setdown_hascmd`
 
