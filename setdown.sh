@@ -87,7 +87,7 @@ setdown_link() {
   if ! ln -s "$1" "$2" >/dev/null 2>&1; then
     if ! readlink "$2"* | grep -wq "$1"; then
       if setdown_getconsent "Couldn't link $1 to $2, try forcing?"; then
-        ln -sf "$1" "$2"
+        ln -sf "$1" "$2" >/dev/null 2>&1
       else
         return 1
       fi
@@ -123,7 +123,7 @@ setdown_sudo_link() {
   if ! sudo ln -s "$1" "$2" >/dev/null 2>&1; then
     if ! readlink "$2"* | grep -wq "$1"; then
       if setdown_getconsent "Couldn't link $1 to $2, try forcing?"; then
-        sudo ln -sf "$1" "$2"
+        sudo ln -sf "$1" "$2" >/dev/null 2>&1
       else
         return 1
       fi
@@ -134,10 +134,21 @@ setdown_sudo_link() {
 # Copies $1 to $2 with sudo permissions
 # setdown_sudo_copy my_script /usr/local/sbin/
 setdown_sudo_copy() {
-  # Create if destination does not exist or user consents to overwrite
-  if ! sudo cp -r "$1" "$2" >/dev/null 2>&1; then
-    setdown_getconsent "Couldn't copy $1 to $2, try forcing?" &&
-      sudo cp -rf "$1" "$2"
+  # If the destination already exists or copying failed
+  if [ -e "$2" ] || ! sudo cp -r "$1" "$2" >/dev/null 2>&1; then
+    # If the destination is not a file, or has identical contents as the source
+    if [ ! -f "$1" ] || ! sudo cmp -s "$1" "$2"; then
+      # Ask to overwrite the destination
+      if setdown_getconsent "Couldn't copy $1 to $2, try forcing?"; then
+        if [ -d "$1" ]; then
+          rm -rf "$2"
+        fi
+
+        sudo cp -rf "$1" "$2" >/dev/null 2>&1
+      else
+        return 1
+      fi
+    fi
   fi
 }
 

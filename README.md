@@ -47,6 +47,21 @@ Creates a symlink from `$2` pointing to `$1` with sudo permissions.
 setdown_sudo_link ~/dotfiles/my_script /usr/local/sbin/my_script
 ```
 
+#### `setdown_sudo_copy`
+
+**depends on: dialog | sudo | cmp | cp**  
+Copies `$1` to `$2` with sudo permissions.
+
+- Directories will always be placed at the destination location rather than inside it.
+- If the destination already exists or copying fails, the user will be asked to force copying.
+- If the source is a file and the destination is identical, no copy is performed.
+- If the source is a directory and the destination is identical, the user will be prompted to overwrite.
+
+```bash
+setdown_sudo_copy ~/dotfiles/my_script /usr/local/sbin/
+setdown_sudo_copy ~/dotfiles/shell-scripts/ /usr/local/sbin/shell-scripts
+```
+
 ### Utility Commands
 
 #### `setdown_hascmd`
