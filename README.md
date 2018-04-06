@@ -10,6 +10,19 @@ I'm personally using setdown.sh for my [dotfiles](https://github.com/codehearts/
 
 ### User Input Commands
 
+#### `setdown_getconsent`
+
+**depends on: dialog**  
+Prompts a yes/no question with `$1` as the string to display.
+
+- `true` is returned only if the user selected "Yes." All other options return `false`.
+
+```bash
+if setdown_getconsent "Install firefox?"; then
+  install firefox
+fi
+```
+
 #### `setdown_getopts`
 
 **depends on: dialog**  
