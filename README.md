@@ -10,120 +10,107 @@ I'm personally using setdown.sh for my [dotfiles](https://github.com/codehearts/
 
 ### User Input Commands
 
-#### `setdown_getconsent`
-
-**depends on: dialog**  
+- **`setdown_getconsent`**: *dialog*  
 Prompts a yes/no question with `$1` as the string to display.
 
-- `true` is returned only if the user selected "Yes." All other options return `false`.
+  ```bash
+  if setdown_getconsent "Install firefox?"; then
+    install firefox
+  fi
+  ```
 
-```bash
-if setdown_getconsent "Install firefox?"; then
-  install firefox
-fi
-```
+  - `true` is returned only if the user selected "Yes." All other options return `false`.
 
-#### `setdown_getopts`
-
-**depends on: dialog**  
+- **`setdown_getopts`**: *dialog*  
 Displays a checklist with `$1` as the title and choices from an associative array named by `$2`.
 
-- `$2` is the _name_ of the associative array.
-- The format of the array named by `$2` is `(choice_name status)`.
-  - Choice name is an arbitrary string.
-  - Status is either `on` to select by default or `off` to deselect by default.
-- This function outputs a string over stdout which evaluates to an array.
+  ```bash
+  all_packages=('docker', 'gcc')
+  editors=('emacs' off 'vim' on)
 
-```bash
-all_packages=('docker', 'gcc')
-editors=('emacs' off 'vim' on)
+  declare -a editor_choices=$(setdown_getopts 'Choose editors to install' editors)
+  all_packages+=("${editor_choices[@]}")
 
-declare -a editor_choices=$(setdown_getopts 'Choose editors to install' editors)
-all_packages+=("${editor_choices[@]}")
+  for package in "${all_packages[@]}"; do
+    install "$package" # (docker, gcc, vim) by default
+  done
+  ```
 
-for package in "${all_packages[@]}"; do
-  install "$package" # (docker, gcc, vim) by default
-done
-```
+  - `$2` is the _name_ of the associative array.
+  - The format of the array named by `$2` is `(choice_name status)`.
+    - Choice name is an arbitrary string.
+    - Status is either `on` to select by default or `off` to deselect by default.
+  - This function outputs a string over stdout which evaluates to an array.
+
 
 ### Filesystem Commands
 
-#### `setdown_link`
-
-**depends on: dialog | grep | readlink | ln**  
+- **`setdown_link`**: *dialog, grep, readlink, ln*  
 Creates a symlink from `$2` pointing to `$1`.
 
-- If the link can't be created, the user will be asked to force linking.
+  ```bash
+  setdown_link ~/dotfiles/.bashrc ~/.bashrc
+  ```
 
-```bash
-setdown_link ~/dotfiles/.bashrc ~/.bashrc
-```
+  - If the link can't be created, the user will be asked to force linking.
 
-#### `setdown_copy`
 
-**depends on: dialog | cmp | cp**  
+- **`setdown_copy`**: *dialog, cmp, cp*  
 Copies `$1` to `$2`.
 
-- Directories will always be placed at the destination location rather than inside it.
-- If the destination already exists or copying fails, the user will be asked to force copying.
-- If the source is a file and the destination is identical, no copy is performed.
-- If the source is a directory and the destination is identical, the user will be prompted to overwrite.
+  ```bash
+  setdown_copy ~/dotfiles/.bashrc ~/.bashrc
+  setdown_copy ~/dotfiles/.vim/ ~/.vim/
+  ```
 
-```bash
-setdown_copy ~/dotfiles/.bashrc ~/.bashrc
-setdown_copy ~/dotfiles/.vim/ ~/.vim/
-```
+  - Directories will always be placed at the destination location rather than inside it.
+  - If the destination already exists or copying fails, the user will be asked to force copying.
+  - If the source is a file and the destination is identical, no copy is performed.
+  - If the source is a directory and the destination is identical, the user will be prompted to overwrite.
 
-#### `setdown_sudo_link`
-
-**depends on: dialog | sudo | grep | readlink | ln**  
+- **`setdown_sudo_link`**: *dialog, sudo, grep, readlink, ln*  
 Creates a symlink from `$2` pointing to `$1` with sudo permissions.
 
-- If the link can't be created, the user will be asked to force linking.
+  ```bash
+  setdown_sudo_link ~/dotfiles/my_script /usr/local/sbin/my_script
+  ```
 
-```bash
-setdown_sudo_link ~/dotfiles/my_script /usr/local/sbin/my_script
-```
+  - If the link can't be created, the user will be asked to force linking.
 
-#### `setdown_sudo_copy`
 
-**depends on: dialog | sudo | cmp | cp**  
+- **`setdown_sudo_copy`**: *dialog, sudo, cmp, cp*  
 Copies `$1` to `$2` with sudo permissions.
 
-- Directories will always be placed at the destination location rather than inside it.
-- If the destination already exists or copying fails, the user will be asked to force copying.
-- If the source is a file and the destination is identical, no copy is performed.
-- If the source is a directory and the destination is identical, the user will be prompted to overwrite.
+  ```bash
+  setdown_sudo_copy ~/dotfiles/my_script /usr/local/sbin/
+  setdown_sudo_copy ~/dotfiles/shell-scripts/ /usr/local/sbin/shell-scripts
+  ```
 
-```bash
-setdown_sudo_copy ~/dotfiles/my_script /usr/local/sbin/
-setdown_sudo_copy ~/dotfiles/shell-scripts/ /usr/local/sbin/shell-scripts
-```
+  - Directories will always be placed at the destination location rather than inside it.
+  - If the destination already exists or copying fails, the user will be asked to force copying.
+  - If the source is a file and the destination is identical, no copy is performed.
+  - If the source is a directory and the destination is identical, the user will be prompted to overwrite.
 
 ### Utility Commands
 
-#### `setdown_hascmd`
-
-**depends on: command**  
+- **`setdown_hascmd`**: *command*  
 Determines if a command is available.
 
-```bash
-if setdown_hascmd ruby; then
-  ruby main.rb;
-fi
-```
+  ```bash
+  if setdown_hascmd ruby; then
+    ruby main.rb;
+  fi
+  ```
 
-#### `setdown_hasstr`
-
-**depends on: no dependencies**  
+- **`setdown_hasstr`**: *no dependencies*  
 Determines if a string is a member of an array.
 
-```bash
-fruits=(apple banana cherry)
-if setdown_hasstr fruits 'celery'; then # false
-  echo 'celery is a fruit'
-fi
-```
+  ```bash
+  fruits=(apple banana cherry)
+  if setdown_hasstr fruits 'celery'; then # false
+    echo 'celery is a fruit'
+  fi
+  ```
 
 ## Development
 
