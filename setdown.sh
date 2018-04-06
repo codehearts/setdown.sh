@@ -69,11 +69,11 @@ setdown_getconsent() {
 # all_choices+=("${user_choices[@]}")
 # for choice in "${user_choices[@]}"; do echo "$choice"; done
 setdown_getopts() {
-  local -n options=$2
-  echo '('
-  [[ "${options[*]}" ]] && $setdown_dialog --no-items --checklist \
-    "$1" 24 70 16 "${options[@]}"
-  echo ')'
+  local -n _setdown_options=$2
+  echo -n '('
+  [[ "${_setdown_options[*]}" ]] && $setdown_dialog --no-items --checklist \
+    "$1" 24 70 16 "${_setdown_options[@]}"
+  echo -n ')'
 }
 
 #

@@ -8,6 +8,31 @@ I'm personally using setdown.sh for my [dotfiles](https://github.com/codehearts/
 
 ## Command Reference
 
+### User Input Commands
+
+#### `setdown_getopts`
+
+**depends on: dialog**  
+Displays a checklist with `$1` as the title and choices from an associative array named by `$2`.
+
+- `$2` is the _name_ of the associative array.
+- The format of the array named by `$2` is `(choice_name status)`.
+  - Choice name is an arbitrary string.
+  - Status is either `on` to select by default or `off` to deselect by default.
+- This function outputs a string over stdout which evaluates to an array.
+
+```bash
+all_packages=('docker', 'gcc')
+editors=('emacs' off 'vim' on)
+
+declare -a editor_choices=$(setdown_getopts 'Choose editors to install' editors)
+all_packages+=("${editor_choices[@]}")
+
+for package in "${all_packages[@]}"; do
+  install "$package" # (docker, gcc, vim) by default
+done
+```
+
 ### Filesystem Commands
 
 #### `setdown_link`
