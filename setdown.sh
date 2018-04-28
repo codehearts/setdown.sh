@@ -42,14 +42,23 @@ setdown_getpw() {
 # setdown_sudo 'Enter your password:' && sudo whoami || echo "No auth"
 setdown_sudo() {
   # Do nothing if sudo cache is already primed
-  sudo -n true 2>/dev/null && return 0
+  if sudo -vn 2>/dev/null; then
+    return 0
+  fi
 
-  local password
-  password="$(setdown_getpw "$1")" || return 1
-  while ! setdown_putcmd sudo -Sp '' <<< "$password" true; do
-    password="$(setdown_getpw 'Incorrect password, try again:')" || return 1
-  done
-  unset password
+  local _message="$1"
+  while
+    local _password
+
+    # If obtaining a password fails, exit with the return status
+    _password="$(setdown_getpw "$_message")" || return $?
+
+    # Set an incorrect password message for subsequent iterations
+    _message='Incorrect password, try again:'
+
+    # The loop will continue until this line returns false
+    ! printf '%s\n' "$_password" | sudo -Svp '' >/dev/null 2>&1
+  do :; done
 }
 
 # Prompts a yes/no question

@@ -10,6 +10,22 @@ I'm personally using setdown.sh for my [dotfiles](https://github.com/codehearts/
 
 ### User Input Commands
 
+- **`setdown_sudo`**: *dialog, sudo*  
+Displays a password entry field with `$1` as the prompt, priming the sudo cache.
+
+  ```bash
+  if setdown_sudo 'Enter password for installation:'; then
+    sudo install firefox
+  else
+    printf 'Authentication not provided for installation\n'
+  fi
+  ```
+
+  - `true` is returned only if the user entered the correct password.
+  - `false` is returned if the user aborts password entry.
+  - The user will have infinite attempts to enter the correct password.
+  - If the sudo cache is already primed, no password is prompted.
+
 - **`setdown_getconsent`**: *dialog*  
 Prompts a yes/no question with `$1` as the string to display.
 
