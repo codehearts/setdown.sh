@@ -1,0 +1,252 @@
+#!/bin/sh
+
+createSpy() {
+    if [ $# -eq 0 ]; then
+        echo 'Usage: spy SPY_NAME'
+        return 1
+    fi
+
+    # shellcheck disable=SC2039
+    local val output error_output
+
+    while getopts :o:r:e: opt; do
+        case "$opt" in
+            o) output="$OPTARG" ;;
+            e) error_output="$OPTARG" ;;
+            r) val="$val $OPTARG" ;;
+            *) shpy_die "Error: Unknown option -$OPTARG" ;;
+        esac
+    done
+    shift $(( OPTIND - 1 ))
+    OPTIND=1
+
+    [ -n "$1" ] || shpy_die "Error: Missing spy name"
+
+    _shpyInit
+    _shpyResetSpy "$1"
+    _shpySpySetReturnValue "$1" "${val:-0}"
+    _shpySpySetOutput "$1" "$output"
+    _shpySpySetErrorOutput "$1" "$error_output"
+    _shpyInjectSpyFunction "$1"
+}
+
+createStub() {
+    createSpy "$@"
+}
+
+getSpyCallCount() {
+    if [ $# -eq 0 ]; then
+        echo 'Usage: getSpyCallCount SPY' >&2
+        return 1
+    fi
+
+    _shpyGetDirectoryContentsCount "$_shpy_spies_dir/$1"
+}
+
+wasSpyCalledWith() {
+    if [ $# -eq 0 ]; then
+        echo 'Usage: wasSpyCalledWith SPY [ARG]...' >&2
+        return 1
+    fi
+
+    # shellcheck disable=SC2039
+    local count current name path
+
+    name=$1
+    shift
+
+    current=$(_shpyGetSpyCurent "$name")
+    count=$(getSpyCallCount "$name")
+    if [ "$current" -ge "$count" ]; then
+        echo "Error: spy '$name' has not been called $current time(s)" >&2
+        return 1
+    fi
+
+    path="$_shpy_spies_dir/$name/$current" \
+        _shpyMatchArgs "$@"
+}
+
+examineNextSpyCall() {
+    # shellcheck disable=SC2039
+    local current
+
+    if [ $# -eq 0 ]; then
+        echo 'Usage: examineNextSpyCall SPY' >&2
+        return 1
+    fi
+
+    current=$(_shpyGetSpyCurent "$1")
+    _shpySetSpyCurent "$1" $(( current + 1 ))
+}
+
+cleanupSpies() {
+    if [ -n "$_shpy_spies_dir" ]; then
+        shpy_remove_dir_tree "$_shpy_spies_dir" || shpy_die "Error: \`shpy_remove_dir_tree '$_shpy_spies_dir'\` failed"
+    fi
+}
+
+_shpyInit() {
+    if [ -n "$_shpy_inited" ]; then
+        return
+    fi
+
+    _shpy_inited=1
+    _shpy_spies_dir=$(shpy_make_temp_dir) || shpy_die "Error: \`shpy_make_temp_dir\` failed"
+}
+
+_shpyResetSpy() {
+    shpy_remove_dir_tree "$_shpy_spies_dir/$1" || shpy_die "Error: \`shpy_remove_dir_tree '$_shpy_spies_dir'\` failed"
+
+    eval unset "${1}_val"
+    eval unset "${1}_output"
+    eval unset "_shpy_${1}_current"
+    unset "$1"
+}
+
+_shpyInjectSpyFunction() {
+    eval "$1() { _shpyRunSpy '$1' \"\$@\"; }"
+}
+
+_shpyGetSpyCurent() {
+    # shellcheck disable=SC2039
+    local current
+    eval current="\$_shpy_${1}_current"
+    printf '%s\n' "${current:-0}"
+}
+
+_shpySetSpyCurent() {
+    eval "_shpy_$1_current=$2"
+}
+
+_shpyGetDirectoryContentsCount() {
+    # shellcheck disable=SC2039
+    local path
+    path=$1
+
+    set -- "$path"/*
+    if [ "$1" = "$path/*" ]; then
+        echo 0
+    else
+        echo $#
+    fi
+}
+
+_shpyMatchArgs() {
+    # shellcheck disable=SC2039
+    local arg argCount i
+
+    argCount=$(_shpyGetDirectoryContentsCount "$path")
+    if [ "$argCount" -ne $# ]; then
+        return 1
+    fi
+
+    i=0
+    while [ "$i" -lt "$argCount" ]; do
+        arg=$(cat "$path/$i")
+        if [ "$arg" != "$1" ]; then
+            return 1
+        fi
+
+        shift
+        i=$(( i + 1 ))
+    done
+
+    return 0
+}
+
+_shpyRunSpy() {
+    # shellcheck disable=SC2039
+    local name
+    name=$1
+    shift
+
+    _shpySpySaveArgs "$@"
+    _shpySpyPrintOutput
+    _shpySpyPrintErrorOutput
+    _shpySpyGetReturnValue
+}
+
+_shpySpySaveArgs() {
+    # shellcheck disable=SC2039
+    local arg count i path
+
+    count=$(getSpyCallCount "$name")
+
+    path="$_shpy_spies_dir/$name/$count"
+    shpy_ensure_dir "$path" || shpy_die "Error: \`shpy_ensure_dir '$path'\` failed"
+
+    i=0
+    for arg in "$@"; do
+        printf '%s' "$arg" >|"$path/$i"
+        i=$(( i + 1 ))
+    done
+}
+
+_shpySpySetOutput() {
+    eval "_shpy_${1}_output=\$2"
+}
+
+_shpySpySetErrorOutput() {
+    eval "_shpy_${1}_error_output=\$2"
+}
+
+_shpySpyPrintOutput() {
+    # shellcheck disable=SC2039
+    local output
+    eval output="\$_shpy_${name}_output"
+    if [ -n "$output" ]; then
+        printf '%s' "$output"
+    fi
+}
+
+_shpySpyPrintErrorOutput() {
+    # shellcheck disable=SC2039
+    local error_output
+    eval error_output="\$_shpy_${name}_error_output"
+    if [ -n "$error_output" ]; then
+        printf '%s' "$error_output" 1>&2
+    fi
+}
+
+_shpySpySetReturnValue() {
+    eval "_shpy_${1}_val=\$2"
+}
+
+_shpySpyGetReturnValue() {
+    # shellcheck disable=SC2039
+    local values count current_value
+    eval values="\$_shpy_${name}_val"
+    count=$(getSpyCallCount "$name")
+
+    # $values is a space separated array. Iterate
+    # $count times to set $current_value to the right entry.
+    # If $count is greater than the number of return values,
+    # $current_value is set to the last return value.
+    for value in ${values:-0}; do
+      current_value=$value
+
+      count=$(( count - 1 ))
+      [ $count -eq 0 ] && break
+    done
+
+    return "$current_value"
+}
+
+##### External Interface #####
+
+shpy_make_temp_dir() {
+    command mktemp -d shpy.XXXXXX
+}
+
+shpy_ensure_dir() {
+    command mkdir -p -- "$1"
+}
+
+shpy_remove_dir_tree() {
+    command rm -rf -- "$1"
+}
+
+shpy_die() {
+    echo "${1:-"Error: aborting"}" >&2
+    exit "${2:-1}"
+}

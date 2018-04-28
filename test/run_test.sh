@@ -98,6 +98,9 @@ tearDown() {
 
   # Remove the command output file and temporary files
   rm -rf "$_COMMAND_OUTPUT_FILE" "$_FILE_DIR"
+
+  # Restore all spies
+  cleanupSpies
 }
 
 
@@ -176,8 +179,10 @@ echo -e "\\nRunning $TEST_NAME:\\n"
 # shellcheck source=/dev/null
 . ./test/"$TEST_NAME"
 # shellcheck source=/dev/null
-source "setdown.sh"
+. ./setdown.sh
 # shellcheck source=/dev/null
-source "test/stub/stub.sh"
+. ./test/shpy
 # shellcheck source=/dev/null
-source "test/shunit2/shunit2"
+. ./test/shpy-shunit2
+# shellcheck source=/dev/null
+. ./test/shunit2
