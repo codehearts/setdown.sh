@@ -5,12 +5,8 @@ language: bash
 services:
   - docker
 
-install:
-  - make install
-
-script:
-  - make test
-
-after_success:
-  - make coverage
-  - bash <(curl -s https://codecov.io/bash)
+jobs:
+  include:
+    - script: make lint
+    - script: make test
+    - script: make coverage && bash <(curl -s https://codecov.io/bash)
