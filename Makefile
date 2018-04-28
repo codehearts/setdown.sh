@@ -10,26 +10,30 @@ KCOV_VERSION=33
 test: test_bash4_4
 
 test_bash4_4: docker_installed
+ifeq (, $(shell docker images -q bash:4.4))
+	@docker pull bash:4.4
+endif
 	@docker run $(DOCKER_FLAGS) \
 		--mount type=bind,source=$(REPO_ROOT),target=/app \
 		bash:4.4 /app/$(TEST_RUNNER)
 
 lint: docker_installed
+ifeq (, $(shell docker images -q koalaman/shellcheck:latest))
+	@docker pull koalaman/shellcheck:latest
+endif
 	@docker run $(DOCKER_FLAGS) \
 		--mount type=bind,source=$(REPO_ROOT),target=/app,readonly \
 		koalaman/shellcheck:latest /app/setdown.sh /app/test/run_all_tests.sh \
 		/app/test/run_test.sh $(LINT_TESTS)
 
 coverage: docker_installed
+ifeq (, $(shell docker images -q ragnaroek/kcov:v$(KCOV_VERSION)))
+	@docker pull ragnaroek/kcov:v$(KCOV_VERSION)
+endif
 	@docker run $(DOCKER_FLAGS) --security-opt seccomp=unconfined \
 		--mount type=bind,source=$(REPO_ROOT),target=/source \
 		--entrypoint=/source/$(TEST_RUNNER) -e USE_KCOV=true \
 		ragnaroek/kcov:v$(KCOV_VERSION)
-
-install:
-	@docker pull bash:4.4
-	@docker pull koalaman/shellcheck:latest
-	@docker pull ragnaroek/kcov:v$(KCOV_VERSION)
 
 docker_installed:
 ifeq (, $(shell which docker))
