@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 #
 # Dialog
@@ -78,7 +78,7 @@ setdown_getconsent() {
 setdown_getopts() {
   local -n _setdown_options=$2
   echo -n '('
-  [[ "${_setdown_options[*]}" ]] && $setdown_dialog --no-items --checklist \
+  [ -n "${_setdown_options[*]}" ] && $setdown_dialog --no-items --checklist \
     "$1" 24 70 16 "${_setdown_options[@]}"
   echo -n ')'
 }
@@ -177,7 +177,7 @@ setdown_hasstr() {
   local -n list=$1
 
   for item in "${list[@]}"; do
-    if [[ "$2" == "$item" ]]; then
+    if [ "$2" = "$item" ]; then
       return 0
     fi
   done
