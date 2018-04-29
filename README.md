@@ -10,6 +10,22 @@ I'm personally using setdown.sh for my [dotfiles](https://github.com/codehearts/
 
 ### User Input Commands
 
+- **`setdown_putstr`**: *dialog*  
+Displays a message within a window and leaves it on screen.
+
+  ```bash
+  setdown_putstr "Initializing cache, please wait..."
+  ```
+
+  - The output window remains on screen once the command exits, allowing for seamless dialog windows.
+
+- **`setdown_putstr_ok`**: *dialog*  
+Displays a message within a window and waits for the user to press ok.
+
+  ```bash
+  setdown_putstr_ok "This installation take $installation_size on disk"
+  ```
+
 - **`setdown_putcmd`**: *bash, dialog*  
 Displays a window with standard output and error from a command. 
 
