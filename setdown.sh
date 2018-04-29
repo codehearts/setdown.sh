@@ -47,7 +47,7 @@ setdown_sudo() {
   fi
 
   local _message="$1"
-  while
+  while true; do
     local _password
 
     # If obtaining a password fails, exit with the return status
@@ -56,9 +56,11 @@ setdown_sudo() {
     # Set an incorrect password message for subsequent iterations
     _message='Incorrect password, try again:'
 
-    # The loop will continue until this line returns false
-    ! printf '%s\n' "$_password" | sudo -Svp '' >/dev/null 2>&1
-  do :; done
+    # The loop will continue until the correct password is entered
+    if printf '%s\n' "$_password" | sudo -Svp '' >/dev/null 2>&1; then
+      break;
+    fi
+  done
 }
 
 # Prompts a yes/no question
