@@ -10,6 +10,16 @@ I'm personally using setdown.sh for my [dotfiles](https://github.com/codehearts/
 
 ### User Input Commands
 
+- **`setdown_putcmd`**: *bash, dialog*  
+Displays a window with standard output and error from a command. 
+
+  ```bash
+  setdown_putcmd find / -size 15c
+  ```
+
+  - The return status of the given command will be returned.
+  - The output window remains on screen once the command exits, allowing for seamless dialog windows.
+
 - **`setdown_getstr`**: *dialog*  
 Displays a text entry field with `$1` as the prompt and `$2` as an optional default value.
 
