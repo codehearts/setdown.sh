@@ -3,6 +3,7 @@ TEST_RUNNER=test/run_all_tests.sh
 
 TESTS=$(wildcard test/test_*.sh)
 LINT_TESTS=$(addprefix /app/, $(TESTS))
+CHECKBASHISMS_TESTS=$(addprefix /work/, $(TESTS))
 
 DOCKER_FLAGS=-it --rm -e SHUNIT_COLOR=always
 KCOV_VERSION=33
@@ -18,9 +19,16 @@ endif
 		bash:4.4 /app/$(TEST_RUNNER)
 
 lint: docker_installed
+ifeq (, $(shell docker images -q manabu/checkbashisms-docker:latest))
+	@docker pull manabu/checkbashisms-docker:latest
+endif
 ifeq (, $(shell docker images -q koalaman/shellcheck:latest))
 	@docker pull koalaman/shellcheck:latest
 endif
+	@docker run $(DOCKER_FLAGS) \
+		--mount type=bind,source=$(REPO_ROOT),target=/work,readonly \
+		manabu/checkbashisms-docker:latest /work/setdown.sh /work/test/run_all_tests.sh \
+		/work/test/run_tests.sh $(CHECKBASHISMS_TESTS)
 	@docker run $(DOCKER_FLAGS) \
 		--mount type=bind,source=$(REPO_ROOT),target=/app,readonly \
 		koalaman/shellcheck:latest /app/setdown.sh /app/test/run_all_tests.sh \
