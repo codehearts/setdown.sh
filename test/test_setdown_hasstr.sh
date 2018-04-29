@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Member of array returns `true` with no output
 test_string_is_in_array() {

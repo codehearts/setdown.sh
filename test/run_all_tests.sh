@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Passes all scripts in test/ beginning with test_ to run_test.sh
 # If USE_KCOV is set externally, tests will be run through kcov

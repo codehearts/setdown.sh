@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Provides all setup and teardown functions, and performs assertions
 # to catch mistakes and reduce complexity in testcases.

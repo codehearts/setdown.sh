@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 test_user_consents() {
   createSpy -r 0 dialog

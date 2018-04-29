@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 test_text_entered_without_default() {
   createSpy -r 0 -o "testname" dialog # User entered "testname"

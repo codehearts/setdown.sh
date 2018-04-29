@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 test_password_entered() {
   createSpy -r 0 -o "testpass" dialog # User entered "testpass"

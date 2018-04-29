@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 test_sudo_already_primed() {
   createSpy -r 0 sudo # Cache already primed

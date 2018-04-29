@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 test_display_message_with_ok_button() {
   createSpy -r 0 dialog

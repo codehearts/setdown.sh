@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 test_link_does_not_exist() {
   touch "$FILE_1"

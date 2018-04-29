@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Existing command returns `true` with no output
 test_command_exists() {

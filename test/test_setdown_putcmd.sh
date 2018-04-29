@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 test_command_succeeds() {
   createSpy -r 0 myCommand
