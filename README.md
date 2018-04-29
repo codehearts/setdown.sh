@@ -10,8 +10,19 @@ I'm personally using setdown.sh for my [dotfiles](https://github.com/codehearts/
 
 ### User Input Commands
 
+- **`setdown_getstr`**: *dialog*  
+Displays a text entry field with `$1` as the prompt and `$2` as an optional default value.
+
+  ```bash
+  username="$(setdown_getstr "Who is the user?" "lain")"
+  ```
+
+  - `true` is returned only if the user provides input.
+  - `false` is returned if the user aborts text entry.
+  - User input is given over standard output.
+
 - **`setdown_getpw`**: *dialog*  
-Displays a password entry field with `$1` as the prompt. User input is given over standard output.
+Displays a password entry field with `$1` as the prompt.
 
   ```bash
   setdown_getpw 'Enter your password:' | sudo -Sp '' install firefox
@@ -19,6 +30,7 @@ Displays a password entry field with `$1` as the prompt. User input is given ove
 
   - `true` is returned only if the user provides input.
   - `false` is returned if the user aborts password entry.
+  - User input is given over standard output.
 
 - **`setdown_sudo`**: *dialog, sudo*  
 Displays a password entry field with `$1` as the prompt, priming the sudo cache.
